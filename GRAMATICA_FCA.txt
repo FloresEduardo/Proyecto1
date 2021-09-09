@@ -1,0 +1,155 @@
+GRAMATICA FCA
+Gramatica para archivo FCA
+
+Expreciones regulares
+digito	 	 = [0-9]
+numero       = {digito}+("."{digito}*)?
+letra		 = [a-zA-ZñÑ]
+id			 = {letra}({letra}|{numero}|_)*
+comillas	 = \"
+cadena		 = {comillas}[^[\"]]*{comillas}
+comentario 	 =	"##".*
+space		 = [\ \r\t\f\t]
+enter   	 = [\ \n]
+
+
+LA GRAMATICA SE INICIA CON EL NO TERMINAL "S"
+S   -> 					  INICIO
+
+EPS   ->					  
+
+
+INICIO   -> 		 	  GenerarReporteEstadistico "{" CUERPO "}"
+
+CUERPO   -> 			  SENTC SENTC_
+
+SENTC   -> 				  GLOBALES
+						| BARRAS
+						| PIE
+						| LINEAS
+						| COMPARE
+						
+
+SENTC_   -> 			  SENTC SENTC_
+						| EPS
+
+GLOBALES   -> 			  DefinirGlobales "{" CUERPO_GLOBAL "}"
+						
+
+CUERPO_GLOBAL   -> 		  DECLARACIONES_
+						
+
+DECLARACIONES   -> 		  TIPO L_ID ASIG ";"
+						| error 
+						
+
+DECLARACIONES_   -> 	  DECLARACIONES DECLARACIONES_
+						| EPS
+						
+
+TIPO   -> 				  String
+						| Double
+						
+
+L_ID   -> 				  Id L_ID_
+						
+
+L_ID_   -> 			  	  "," Id L_ID_
+						| EPS
+						
+
+ASIG   -> 				  "=" EXP
+						
+
+EXP   -> 				  Numero
+						| Cadena
+						| Id
+						| "$" "{" PUNTAJE "}"
+						
+
+PUNTAJE   ->		 	  PuntajeEspecifico ESPECIFICO_
+						| PuntajeGeneral
+						
+
+ESPECIFICO_   -> 		  ESPECIFICO ESPECIFICO_
+						| EPS
+						
+
+ESPECIFICO   ->			  "," Cadena
+						| error ";"
+						
+
+BARRAS   -> 			  GraficaBarras "{" CUERPO_BARRAS "}"
+								  
+
+CUERPO_BARRAS   -> 		  DECLARACIONES_B_
+						
+
+DECLARACIONES_B   -> 	  CARACTERISTICA_B ":" VALOR ";"
+						| error ";"
+						
+
+DECLARACIONES_B_   -> 	  DECLARACIONES_B DECLARACIONES_B_
+						| EPS
+								  
+
+CARACTERISTICA_B   -> 	  Titulo
+						| EjeX
+						| Valores
+						| TituloX
+						| TituloY
+						
+
+VALOR   -> 				  EXP
+						| ARRAY
+						
+
+ARRAY   -> 				  "[" CUERPO_A "]"
+						
+
+CUERPO_A   -> 			  EXP CUERPO_A_		
+						
+
+CUERPO_A_   -> 			  "," EXP CUERPO_A_
+						  | EPS
+						
+
+PIE   -> 				  GraficaPie "{" CUERPO_PIE "}"
+						
+
+CUERPO_PIE   -> 		  DECLARACIONES_P_
+						
+
+DECLARACIONES_P   -> 	  CARACTERISTICA_P ":" VALOR ";"
+						| error ";"
+						
+
+DECLARACIONES_P_   -> 	  DECLARACIONES_P DECLARACIONES_P_
+						| EPS
+						
+
+CARACTERISTICA_P   -> 	  Titulo
+						| EjeX
+						| Valores
+						
+
+LINEAS   -> 			  GraficaLineas "{" CUERPO_LINEAS "}"
+						
+
+CUERPO_LINEAS   -> 		  DECLARACIONES_L_
+						
+
+DECLARACIONES_L   -> 	  CARACTERISTICA_L ":" VALOR ";"
+						| error ";"
+						
+
+DECLARACIONES_L_   -> 	  DECLARACIONES_L DECLARACIONES_L_
+						| EPS
+						
+
+CARACTERISTICA_L   -> 	  Titulo
+						| Archivo
+						
+
+COMPARE   -> 			  Compare "(" Cadena "," Cadena ")" ";"
+						| error ";"

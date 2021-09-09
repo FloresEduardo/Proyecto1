@@ -1,0 +1,259 @@
+package proyecto1;
+
+import java_cup.runtime.Symbol;
+import proyecto1.Inicio;
+
+//PARSER PARA EL ARCHIVO DE ESCENARIOS
+parser code
+{://Codigo visible
+
+	//public static Nodo padre;
+
+    public void syntax_error(Symbol s){
+        //Inicio.errorSintactico("Sintactico: \t'"+ s.value +"' \tLinea "+(s.left+1)+" \tcolumna "+(s.right));
+        Inicio.errorSintactico("Sintactico", ""+s.value, ""+(s.left+1), ""+(s.right+1));
+    }
+
+    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception{ 
+    	//Inicio.errorSintactico("SintacticoNR: \t'"+ s.value +"' \tLinea "+(s.left+1)+" \tcolumna "+(s.right));
+    	Inicio.errorSintactico("SintacticoNR", ""+s.value, ""+(s.left+1), ""+(s.right+1));
+    }
+
+    public void rutasProyecto(String proyecto1, String proyecto2)
+    {
+    	Inicio.rutasProyecto(proyecto1, proyecto2);
+    }
+
+    public void guardarVariablesGlobales(String tipo, String variable, String valor)
+    {
+    	Inicio.guardarVariablesGlobales(tipo, variable, valor);
+    }
+
+    public void guardarDatosBarras(String caracteristicas)
+    {
+    	Inicio.guardarDatosBarras(caracteristicas);
+    }
+
+    public void guardarDatosPie(String caracteristicas)
+    {
+    	Inicio.guardarDatosPie(caracteristicas);
+    }
+
+    public void guardarDatosLineas(String caracteristicas)
+    {
+    	Inicio.guardarDatosLineas(caracteristicas);
+    }
+
+:}
+
+
+
+terminal String tkDefinirGlobales;
+terminal String tkGenerarReporteEstadistico;
+terminal String tkString;
+terminal String tkDouble;
+terminal String tkGraficaBarras;
+terminal String tkTitulo;
+terminal String tkEjeX;
+terminal String tkValores;
+terminal String tkTituloX;
+terminal String tkTituloY;
+terminal String tkGraficaPie;
+terminal String tkGraficaLineas;
+terminal String tkArchivo;
+terminal String tkPuntajeGeneral;
+terminal String tkPuntajeEspecifico;
+terminal String tkCompare;
+
+terminal String tkIgual;
+terminal String tkDosPuntos;
+terminal String tkCorcheteA;
+terminal String tkCorcheteC;
+terminal String tkComa;
+terminal String tkPuntoComa;
+terminal String tkDolar;
+terminal String tkParentesisA;
+terminal String tkParentesisC;
+
+terminal String tkNumero;
+terminal String tkId;
+terminal String tkCadena;
+//terminal String tkPath;
+terminal String tkLlaveA;
+terminal String tkLlaveC;
+
+
+nonterminal String EPS, S, INICIO, EXP, CUERPO, SENTC, SENTC_, GLOBALES, CUERPO_GLOBAL, DECLARACIONES, DECLARACIONES_, TIPO, L_ID, L_ID_, ASIG, BARRAS, CUERPO_BARRAS, CARACTERISTICA_B, VALOR, PIE, CUERPO_PIE, CARACTERISTICA_P, LINEAS, CUERPO_LINEAS, CARACTERISTICA_L, COMPARE, ARRAY, DECLARACIONES_B, DECLARACIONES_L, DECLARACIONES_P, DECLARACIONES_B_, DECLARACIONES_L_, DECLARACIONES_P_, CUERPO_A, CUERPO_A_, PUNTAJE, ESPECIFICO, ESPECIFICO_;
+
+start with S;
+
+S::= 					  INICIO;
+
+EPS::=					  
+;
+
+INICIO::= 				  tkGenerarReporteEstadistico tkLlaveA CUERPO tkLlaveC;
+
+CUERPO::= 				  SENTC SENTC_;
+
+SENTC::= 				  GLOBALES
+						| BARRAS
+						| PIE
+						| LINEAS
+						| COMPARE
+						;
+
+SENTC_::= 				  SENTC SENTC_
+						| EPS;
+
+GLOBALES::= 			  tkDefinirGlobales tkLlaveA CUERPO_GLOBAL tkLlaveC
+						;
+
+CUERPO_GLOBAL::= 		  DECLARACIONES_
+						;
+
+DECLARACIONES::= 		  TIPO:x1 L_ID:x2 ASIG:x3 tkPuntoComa
+						{:	guardarVariablesGlobales(x1, x2, x3); :}
+						| error 
+						;
+
+DECLARACIONES_::= 		  DECLARACIONES DECLARACIONES_
+						| EPS
+						;
+
+TIPO::= 				  tkString:x1 {: RESULT = x1; :}
+						| tkDouble:x1 {: RESULT = x1; :}
+						;
+
+L_ID::= 				  tkId:x1 L_ID_:x2
+						{:	String datos = x1 + "@" + x2;
+							RESULT = datos; :}
+						;
+
+L_ID_::= 			  	  tkComa tkId:x1 L_ID_:x2
+						{: 	String datos = x1 + "@" + x2; 
+							RESULT = datos; :}
+						| EPS {: RESULT = ""; :}
+						;
+
+ASIG::= 				  tkIgual EXP:x1 {: RESULT = x1; :}
+						;
+
+EXP::= 					  tkNumero:x1 {: RESULT = x1; :}
+						| tkCadena:x1 {: RESULT = x1; :}
+						| tkId:x1 {: RESULT = x1; :}
+						| tkDolar tkLlaveA PUNTAJE:x1 tkLlaveC {: RESULT = x1; :}
+						;
+
+PUNTAJE::=		 		  tkPuntajeEspecifico:x1 ESPECIFICO_:x2
+						{:	RESULT = x1 + "#" + x2; :} 
+						| tkPuntajeGeneral:x1 {: RESULT = x1; :}
+						;
+
+ESPECIFICO_::= 			  ESPECIFICO:x1 ESPECIFICO_:x2
+						{:	RESULT = x1 + "#" + x2; :}
+						| EPS {: RESULT = ""; :}
+						;
+
+ESPECIFICO::=			  tkComa tkCadena:x1 {: RESULT = x1; :}
+						| error tkPuntoComa
+						;
+
+BARRAS::= 				  tkGraficaBarras tkLlaveA CUERPO_BARRAS:x1 tkLlaveC
+						{:	guardarDatosBarras(x1); :}
+						;		  
+
+CUERPO_BARRAS::= 		  DECLARACIONES_B_:x1 {: RESULT = x1; :}
+						;
+
+DECLARACIONES_B::= 		  CARACTERISTICA_B:x1 tkDosPuntos VALOR:x2 tkPuntoComa
+						{:	//guardarDatosBarras(x1); 
+							RESULT = x1 + "@" + x2;
+						:}
+						| error tkPuntoComa
+						;
+
+DECLARACIONES_B_::= 	  DECLARACIONES_B:x1 DECLARACIONES_B_:x2
+						{:	
+							RESULT = x1 + "@@" + x2;
+						:}
+						| EPS {: RESULT = ""; :}
+						;		  
+
+CARACTERISTICA_B::= 	  tkTitulo:x1 {: RESULT = x1; :}
+						| tkEjeX:x1 {: RESULT = x1; :}
+						| tkValores:x1 {: RESULT = x1; :}
+						| tkTituloX:x1 {: RESULT = x1; :}
+						| tkTituloY:x1 {: RESULT = x1; :}
+						;
+
+VALOR::= 				  EXP:x1 {: RESULT = x1; :}
+						| ARRAY:x1 {: RESULT = "array@" + x1; :}
+						;
+
+ARRAY::= 				  tkCorcheteA CUERPO_A:x1 tkCorcheteC {: RESULT = x1; :}
+						;
+
+CUERPO_A::= 			  EXP:x1 CUERPO_A_:x2
+						{:	RESULT = x1 + "@" + x2; :}			
+						;
+
+CUERPO_A_::= 			  tkComa EXP:x1 CUERPO_A_:x2
+						{:	RESULT = x1 + "@" + x2; :}
+						| EPS {: RESULT = ""; :}
+						;
+
+PIE::= 					  tkGraficaPie tkLlaveA CUERPO_PIE:x1 tkLlaveC
+						{:	guardarDatosPie(x1);	:}
+						;
+
+CUERPO_PIE::= 			  DECLARACIONES_P_:x1 {: RESULT = x1; :}
+						;
+
+DECLARACIONES_P::= 		  CARACTERISTICA_P:x1 tkDosPuntos VALOR:x2 tkPuntoComa
+						{:	//guardarDatosPie(x1,x2); 
+							RESULT = x1 + "@" + x2;
+						:}
+						| error tkPuntoComa
+						;
+
+DECLARACIONES_P_::= 	  DECLARACIONES_P:x1 DECLARACIONES_P_:x2
+						{:	RESULT = x1 + "@@" + x2;	:}
+						| EPS {: RESULT = ""; :}
+						;
+
+CARACTERISTICA_P::= 	  tkTitulo:x1 {: RESULT = x1; :}
+						| tkEjeX:x1 {: RESULT = x1; :}
+						| tkValores:x1 {: RESULT = x1; :}
+						;
+
+LINEAS::= 				  tkGraficaLineas tkLlaveA CUERPO_LINEAS:x1 tkLlaveC
+						{:	guardarDatosLineas(x1);	:}
+						;
+
+CUERPO_LINEAS::= 		  DECLARACIONES_L_:x1 {: RESULT = x1; :}
+						;
+
+DECLARACIONES_L::= 		  CARACTERISTICA_L:x1 tkDosPuntos VALOR:x2 tkPuntoComa
+						{:	//guardarDatosLineas(x1,x2); 
+							RESULT = x1 + "@" + x2;
+						:}
+						| error tkPuntoComa
+						;
+
+DECLARACIONES_L_::= 	  DECLARACIONES_L:x1 DECLARACIONES_L_:x2
+						{:	
+							RESULT = x1 + "@@" + x2;
+						:}
+						| EPS {: RESULT = ""; :}
+						;
+
+CARACTERISTICA_L::= 	  tkTitulo:x1 {: RESULT = x1; :}
+						| tkArchivo:x1 {: RESULT = x1; :}
+						;
+
+COMPARE::= 				  tkCompare tkParentesisA tkCadena:x1 tkComa tkCadena:x2 tkParentesisC tkPuntoComa
+						{: Inicio.rutasProyecto(x1,x2); :}
+						| error tkPuntoComa
+						;
+

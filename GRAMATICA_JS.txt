@@ -1,0 +1,222 @@
+GRAMATICA JS
+Gramatica para archivo JS
+
+Expreciones regulares
+digito       = [0-9]
+numero       = {digito}+("."{digito}*)?
+letra        = [a-zA-ZñÑ]
+id           = {letra}({letra}|{numero}|_)*
+comillas     = \"
+cadena       = {comillas}[^[\"]]*{comillas}
+comentario   =  "//".*
+space        = [\ \r\t\f\t]
+enter        = [\ \n]
+
+
+LA GRAMATICA SE INICIA CON EL NO TERMINAL "S"
+
+EPS   ->
+
+
+PUNTO_COMA   ->               ";"
+                            | EPS
+
+S   ->                        Class Id "{" CUERPO "}"
+                            
+
+CUERPO   ->                   SENTC_
+
+SENTC_   ->                   SENTC SENTC_
+                            | EPS 
+
+SENTC   ->                    TIPO Id DECLARACIONES
+                            | CONSOLE 
+                            
+
+CONSOLE   ->                  Console "." Log "(" EXP ")" PUNTO_COMA
+
+DECLARACIONES   ->            L_ID IGUAL:cantParam_Lineas PUNTO_COMA 
+                            
+
+IGUAL   ->                    ASIG
+                            | "+" "+"
+                            | "-" "-"
+                            | INVOCAR
+                             
+           
+TIPO   ->                     Let
+                            | Const
+                            | Var
+                            | EPS
+                            
+
+INVOCAR   ->                  "(" PARAMETRO_SIN ")" FUNCIONES:numLineas
+                            
+
+FUNCIONES   ->                "{" F_SENTS "}"
+                            | EPS
+                            
+
+F_CUERPO   ->                 TIPO:tipo Id F_DECLARACIONES
+                            | CONSOLE 
+                            
+
+F_DECLARACIONES   ->          L_ID F_IGUAL PUNTO_COMA
+
+F_IGUAL   ->                  ASIG
+                            | "+" "+" 
+                            | "-" "-" 
+                            | F_INVOCAR
+                             
+
+F_INVOCAR   ->                "(" PARAMETRO_SIN ")"
+
+F_SENTS   ->                  F_SENTS_
+
+F_SENTS_   ->                 F_SENT F_SENTS_
+                            | EPS 
+
+F_SENT   ->                   F_CUERPO
+                            | IF
+                            | DO_WHILE PUNTO_COMA
+                            | WHILE
+                            | FOR
+                            | SWITCH
+                            | Break PUNTO_COMA
+                            | Return EXP PUNTO_COMA
+                            
+
+IF   ->                       If "(" COND ")" "{" F_SENTS "}" F_IF_
+                            
+
+F_IF_   ->                    Else ELSE
+                            | EPS
+                            
+
+ELSE   ->                     "{" F_SENTS "}" F_IF_
+                            | IF
+                            
+
+DO_WHILE   ->                 Do "{" F_SENTS "}" While "(" COND ")"
+
+WHILE   ->                    While "(" COND ")" "{" F_SENTS "}"
+
+FOR   ->                      For "(" COND_FOR ")" "{" F_SENTS "}"
+
+SWITCH   ->                   Switch "(" EXP ")" "{" SW_SENTS "}"
+
+SW_SENTS   ->                 CASE DEFAULT
+
+CASE   ->                     Case EXP ":" F_SENTS CASE_
+
+CASE_   ->                    Case EXP ":" F_SENTS CASE_
+                            | EPS 
+
+DEFAULT   ->                  Default ":" F_SENTS
+
+COND_FOR   ->                 TIPO:tipo Id ASIG ";" COND ";" Id INCRE_DECRE
+                            
+
+INCRE_DECRE   ->              "+" IG_EXP
+                            | "-" IG_EXP
+                            | "*" IG_EXP
+                            | "=" EXP
+                            
+
+IG_EXP   ->                   "=" EXP
+                            | "+"
+                            | "-"
+                            
+
+L_ID   ->                     L_ID_ 
+
+L_ID_   ->                    "," Id L_ID_
+                            | "." Id L_ID_
+                            | EPS
+
+ASIG   ->                     "=" COND
+                            | EPS 
+
+COND   ->                     COND "||" COND_A
+                            | COND_A
+                            
+
+COND_A   ->                   COND_A "&&" COND_B
+                            | COND_B
+                            
+
+COND_B   ->                   "!" COND_C
+                            | COND_C
+                            
+
+COND_C   ->                   EXP
+                            | EXP RELACIONAL EXP
+                            
+
+RELACIONAL   ->               ">" RELACIONAL_
+                            | "<" RELACIONAL_
+                            | "=" "="
+                            | "!" "="
+                            
+
+RELACIONAL_   ->              "="
+                            | EPS
+                            
+
+EXP   ->                      EXP "+" A
+                            | A
+                            
+
+A   ->                        A "-" B
+                            | B
+                            
+
+B   ->                        B "/" C
+                            | C
+                            
+
+C   ->                        C "*" D
+                            | D
+                            
+
+D   ->                        D "%" E
+                            | E
+                            
+
+E   ->                        E "**" F
+                            | F
+                            
+
+F   ->                        "-" G
+                            | G
+                            
+
+G   ->                        Numero
+                            | Cadena
+                            | Caracter
+                            | True
+                            | False
+                            | Null
+                            | Require "(" Cadena ")"
+                            | "(" COND ")"
+                            | "[" PARAMETRO_SIN "]"
+                            | LLAMADA
+                            
+
+
+LLAMADA   ->                  Id LLAMADA_
+                            
+
+LLAMADA_   ->                 "." Id LLAMADA_
+                            | "(" PARAMETRO_SIN ")"
+                            | EPS
+                            
+
+PARAMETRO_SIN   ->            EXP PARAMETRO_SIN2_
+                            | EPS
+                            
+
+PARAMETRO_SIN2_   ->          "," EXP PARAMETRO_SIN2_
+                            | EPS
+                            
+

@@ -1,0 +1,278 @@
+package proyecto1;
+
+import java_cup.runtime.Symbol;
+import proyecto1.Inicio;
+
+
+parser code
+{:		//Codigo visible
+
+	 public void syntax_error(Symbol s){
+        Inicio.errorSintactico("Sintactico", ""+s.value, ""+(s.left+1), ""+(s.right+1));
+    }
+
+    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception{ 
+    	Inicio.errorSintactico("SintacticoNR", ""+s.value, ""+(s.left+1), ""+(s.right+1));
+    }
+
+
+:}
+
+action code
+{://Codigo de acciones
+
+:}
+
+terminal String tkClass;
+terminal String tkVar;
+terminal String tkLet;
+terminal String tkConst;
+terminal String tkIf;
+terminal String tkElse; 
+terminal String tkFor;
+terminal String tkWhile;
+terminal String tkDo;
+terminal String tkSwitch;
+terminal String tkCase;
+terminal String tkDefault;
+terminal String tkConsole;
+terminal String tkLog;
+terminal String tkBreak;
+terminal String tkRequire;
+terminal String tkNull; 
+terminal String tkTrue; 
+terminal String tkFalse;
+terminal String tkReturn;
+
+terminal String tkIgual;
+terminal String tkDosPuntos; 
+terminal String tkCorcheteA; 
+terminal String tkCorcheteC; 
+terminal String tkComa;
+terminal String tkPuntoComa; 
+terminal String tkParentesisA;
+terminal String tkParentesisC;
+terminal String tkLlaveA;
+terminal String tkLlaveC;
+terminal String tkMas;
+terminal String tkMenos;
+terminal String tkPor;
+terminal String tkDivision;
+terminal String tkPorcentaje;
+terminal String tkNot;
+terminal String tkAnd;
+terminal String tkOr;
+terminal String tkMayor;
+terminal String tkMenor;
+terminal String tkPunto;
+
+terminal String tkNumero;
+terminal String tkId;
+terminal String tkCadena;
+
+nonterminal String IGUAL;
+nonterminal String EPS, S, CUERPO, DECLARACIONES, CONSOLE, ASIG, INCRE_DECRE, COND; 
+nonterminal String COND_A, COND_B, COND_C, RELACIONAL, RELACIONAL_, EXP, A, B, C, P, D, E, LLAMADA, LLAMADA_; 
+nonterminal String ELSE, WHILE, DO_WHILE, INVOCAR, PUNTO_COMA, TIPO, L_ID, L_ID_, F_SENTS; 
+nonterminal String F_SENTS_, F_SENT, IF, FOR, COND_FOR, SWITCH, SW_SENTS, CASE, CASE_, DEFAULT;
+nonterminal String SENTC, FUNCIONES, PARAMETRO_SIN, PARAMETRO_SIN2_, SENTC_;
+nonterminal String F_CUERPO, F_DECLARACIONES, F_IGUAL, F_INVOCAR, F_IF_, IG_EXP;
+
+start with S;
+
+EPS::=
+;
+
+PUNTO_COMA::=                 tkPuntoComa
+                            | EPS;
+
+S::=                          tkClass tkId tkLlaveA CUERPO tkLlaveC;
+
+CUERPO::=                     SENTC SENTC_;
+
+SENTC_::=                     SENTC SENTC_
+                            | EPS ;
+
+SENTC::=                      TIPO tkId DECLARACIONES
+                            | CONSOLE 
+                            ;
+
+CONSOLE::=                    tkConsole tkPunto tkLog tkParentesisA EXP tkParentesisC PUNTO_COMA;
+
+DECLARACIONES::=              L_ID IGUAL PUNTO_COMA
+                            ;
+
+IGUAL::=                      ASIG
+                            | tkMas tkMas 
+                            | tkMenos tkMenos 
+                            | INVOCAR
+                            ; 
+           
+TIPO::=                       tkLet
+                            | tkConst
+                            | tkVar
+                            | EPS
+                            ;
+
+INVOCAR::=                    tkParentesisA PARAMETRO_SIN tkParentesisC FUNCIONES
+                            ;
+
+FUNCIONES::=                  tkLlaveA F_SENTS tkLlaveC
+                            | EPS
+                            ;
+
+F_CUERPO::=                   TIPO tkId F_DECLARACIONES
+                            | CONSOLE 
+                            ;
+
+F_DECLARACIONES::=            L_ID F_IGUAL PUNTO_COMA;
+
+F_IGUAL::=                    ASIG
+                            | tkMas tkMas 
+                            | tkMenos tkMenos 
+                            | F_INVOCAR
+                            ; 
+
+F_INVOCAR::=                  tkParentesisA PARAMETRO_SIN tkParentesisC;
+
+F_SENTS::=                    F_SENT F_SENTS_;
+
+F_SENTS_::=                   F_SENT F_SENTS_
+                            | EPS ;
+
+F_SENT::=                    F_CUERPO
+                            | IF
+                            | DO_WHILE
+                            | WHILE
+                            | FOR
+                            | SWITCH
+                            | tkBreak
+                            | tkReturn
+                            ;
+
+IF::=                         tkIf tkParentesisA COND tkParentesisC tkLlaveA F_SENTS tkLlaveC F_IF_
+                            ;
+
+F_IF_::=                      tkElse ELSE
+                            | EPS
+                            ;
+
+ELSE::=                       tkLlaveA F_SENTS tkLlaveC F_IF_
+                            | IF
+                            ;
+
+DO_WHILE::=                   tkDo tkLlaveA F_SENTS tkLlaveC tkWhile tkParentesisA COND tkParentesisC tkPuntoComa;
+
+WHILE::=                      tkWhile tkParentesisA COND tkParentesisC tkLlaveA F_SENTS tkLlaveC;
+
+FOR::=                        tkFor tkParentesisA COND_FOR tkParentesisC tkLlaveA F_SENTS tkLlaveC;
+
+SWITCH::=                     tkSwitch tkParentesisA EXP tkParentesisC tkLlaveA SW_SENTS tkLlaveC;
+
+SW_SENTS::=                   CASE DEFAULT;
+
+CASE::=                       tkCase EXP tkDosPuntos F_SENTS CASE_;
+
+CASE_::=                      tkCase EXP tkDosPuntos F_SENTS CASE_
+                            | EPS ;
+
+DEFAULT::=                    tkDefault tkDosPuntos F_SENTS;
+
+COND_FOR::=                   TIPO tkId ASIG tkPuntoComa COND tkPuntoComa tkId INCRE_DECRE;
+
+INCRE_DECRE::=                tkMas IG_EXP
+                            | tkMenos IG_EXP
+                            | tkPor IG_EXP;
+
+IG_EXP::=                     tkIgual EXP
+                            | tkMas
+                            | tkMenos
+                            ;
+
+L_ID::=                       L_ID_;
+
+L_ID_::=                      tkComa tkId L_ID_
+                            | tkPunto tkId L_ID_
+                            | EPS ;
+
+ASIG::=                       tkIgual COND
+                            | EPS ;
+
+COND::=                       COND tkOr COND_A
+                            | COND_A
+                            ;
+
+COND_A::=                     COND_A tkAnd COND_B
+                            | COND_B
+                            ;
+
+COND_B::=                     tkNot COND_C
+                            | COND_C
+                            ;
+
+COND_C::=                     EXP
+                            | EXP RELACIONAL EXP
+                            ;
+
+RELACIONAL::=                 tkMayor RELACIONAL_
+                            | tkMenor RELACIONAL_
+                            | tkIgual tkIgual
+                            | tkNot tkIgual
+                            ;
+
+RELACIONAL_::=                tkIgual
+                            | EPS
+                            ;
+
+EXP::=                        EXP tkMas A
+                            | A
+                            ;
+
+A::=                          A tkMenos B
+                            | B
+                            ;
+
+B::=                          B tkDivision C
+                            | C
+                            ;
+
+C::=                          C tkPor P
+                            | P
+                            ;
+
+P::=                          P tkPorcentaje D
+                            | D
+                            ;
+
+D::=                          tkMenos E
+                            | E
+                            ;
+
+E::=                          tkNumero
+                            | tkCadena
+                            | tkTrue
+                            | tkFalse
+                            | tkNull
+                            | tkRequire tkParentesisA tkCadena tkParentesisC
+                            | tkParentesisA COND tkParentesisC
+                            | tkCorcheteA PARAMETRO_SIN tkCorcheteC
+                            | LLAMADA
+                            ;
+
+
+LLAMADA::=                    tkId LLAMADA_
+                            ;
+
+LLAMADA_::=                   tkPunto tkId LLAMADA_
+                            | tkParentesisA PARAMETRO_SIN tkParentesisC
+                            | EPS
+                            ;
+
+PARAMETRO_SIN::=              EXP PARAMETRO_SIN2_
+                            | EPS
+                            ;
+
+PARAMETRO_SIN2_::=            tkComa EXP PARAMETRO_SIN2_
+                            | EPS
+                            ;
+

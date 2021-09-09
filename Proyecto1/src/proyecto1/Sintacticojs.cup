@@ -1,0 +1,406 @@
+package proyecto1;
+
+import java_cup.runtime.Symbol;
+import proyecto1.Inicio;
+
+
+parser code
+{:      //Codigo visible
+
+     public void syntax_error(Symbol s){
+        Inicio.errorSintacticoJS("Sintactico", ""+s.value, ""+(s.left+1), ""+(s.right+1));
+    }
+
+    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception{ 
+        Inicio.errorSintacticoJS("SintacticoNR", ""+s.value, ""+(s.left+1), ""+(s.right+1));
+    }
+
+    public void agregarNodoComparacion(NodoComparacion nodo)
+    {
+        Inicio.agregarNodoComparacion(nodo);
+    }
+
+
+:}
+
+action code
+{://Codigo de acciones
+
+:}
+
+terminal String tkClass;
+terminal String tkVar;
+terminal String tkLet;
+terminal String tkConst;
+terminal String tkIf;
+terminal String tkElse; 
+terminal String tkFor;
+terminal String tkWhile;
+terminal String tkDo;
+terminal String tkSwitch;
+terminal String tkCase;
+terminal String tkDefault;
+terminal String tkConsole;
+terminal String tkLog;
+terminal String tkBreak;
+terminal String tkRequire;
+terminal String tkNull; 
+terminal String tkTrue; 
+terminal String tkFalse;
+terminal String tkReturn;
+
+terminal String tkIgual;
+terminal String tkDosPuntos; 
+terminal String tkCorcheteA; 
+terminal String tkCorcheteC; 
+terminal String tkComa;
+terminal String tkPuntoComa; 
+terminal String tkParentesisA;
+terminal String tkParentesisC;
+terminal String tkLlaveA;
+terminal String tkLlaveC;
+terminal String tkMas;
+terminal String tkMenos;
+terminal String tkPor;
+terminal String tkDivision;
+terminal String tkPorcentaje;
+terminal String tkPotencia;
+terminal String tkNot;
+terminal String tkAnd;
+terminal String tkOr;
+terminal String tkMayor;
+terminal String tkMenor;
+terminal String tkPunto;
+
+terminal String tkNumero;
+terminal String tkId;
+terminal String tkCadena;
+terminal String tkCaracter;
+
+nonterminal String IGUAL;
+nonterminal String EPS, S, CUERPO, DECLARACIONES, CONSOLE, ASIG, INCRE_DECRE, COND; 
+nonterminal String COND_A, COND_B, COND_C, RELACIONAL, RELACIONAL_, EXP, A, B, C, D, E, F, G, LLAMADA, LLAMADA_; 
+nonterminal String ELSE, WHILE, DO_WHILE, INVOCAR, PUNTO_COMA, TIPO, L_ID, L_ID_, F_SENTS; 
+nonterminal String F_SENTS_, F_SENT, IF, FOR, COND_FOR, SWITCH, SW_SENTS, CASE, CASE_, DEFAULT;
+nonterminal String SENTC, FUNCIONES, PARAMETRO_SIN, PARAMETRO_SIN2_, SENTC_;
+nonterminal String F_CUERPO, F_DECLARACIONES, F_IGUAL, F_INVOCAR, F_IF_, IG_EXP;
+
+start with S;
+
+EPS::=
+;
+
+PUNTO_COMA::=                 tkPuntoComa
+                            | EPS;
+
+S::=                          tkClass:x1 tkId:x2 tkLlaveA:x3 CUERPO:x4 tkLlaveC:x5
+                            {:
+                                NodoComparacion nodo = new NodoComparacion();
+                                int lineaInicio = x1left+1;
+                                int lineaFin = x5left+1;
+                                int cantidadLineas = lineaFin - lineaInicio;
+                                nodo.setLineasClase(cantidadLineas - 1);
+                                nodo.setNombreClase(x2);
+                                agregarNodoComparacion(nodo);
+                            :}
+                            ;
+
+CUERPO::=                     SENTC_;
+
+SENTC_::=                     SENTC SENTC_
+                            | EPS ;
+
+SENTC::=                      TIPO:tipo tkId:x1 DECLARACIONES:x2
+                            {:
+                                String arrArroba [] = x2.split("@");    //ej: ,id2,id3,id4 @ 3_41
+                                if(!arrArroba[1].equalsIgnoreCase("asignacion") && !arrArroba[1].equalsIgnoreCase("null"))
+                                {
+                                    NodoComparacion nodo = new NodoComparacion();
+                                    String cantParam_Lineas [] = arrArroba[1].split("_");
+                                    nodo.setNombreFuncion(x1);
+                                    nodo.setCantidadParametros(Integer.parseInt(cantParam_Lineas[0]));
+                                    nodo.setLineasFuncion(Integer.parseInt(cantParam_Lineas[1]));
+                                    agregarNodoComparacion(nodo);
+                                }
+                                else
+                                {
+                                    String listaIds [] = arrArroba[0].split(",");
+                                    if(listaIds.length > 1)
+                                    {
+                                        for(int i=1; i<listaIds.length; i++)
+                                        {
+                                            if(!tipo.equals(""))
+                                            {
+                                                NodoComparacion nodo = new NodoComparacion();
+                                                nodo.setNombreVariable(listaIds[i]);
+                                                agregarNodoComparacion(nodo);
+                                            }
+                                        }
+                                    }
+                                    if(!tipo.equals(""))
+                                    {
+                                        NodoComparacion nodo = new NodoComparacion();
+                                        nodo.setNombreVariable(x1);
+                                        agregarNodoComparacion(nodo);
+                                    }
+                                }
+                            :}
+                            | CONSOLE 
+                            ;
+
+CONSOLE::=                    tkConsole tkPunto tkLog tkParentesisA EXP tkParentesisC PUNTO_COMA;
+
+DECLARACIONES::=              L_ID:x1 IGUAL:cantParam_Lineas PUNTO_COMA 
+                            {: 
+                                RESULT = x1 + "@" + cantParam_Lineas; 
+                            :}
+                            ;
+
+IGUAL::=                      ASIG {: RESULT = "asignacion"; :}
+                            | tkMas tkMas {: RESULT = "null"; :}
+                            | tkMenos tkMenos {: RESULT = "null"; :}
+                            | INVOCAR:x1 {: RESULT = x1; :}
+                            ; 
+           
+TIPO::=                       tkLet:x1 {: RESULT = x1; :}
+                            | tkConst:x1 {: RESULT = x1; :}
+                            | tkVar:x1 {: RESULT = x1; :}
+                            | EPS {: RESULT = ""; :}
+                            ;
+
+INVOCAR::=                    tkParentesisA PARAMETRO_SIN:x1 tkParentesisC FUNCIONES:numLineas
+                            {:
+                                String arreglo [] = x1.split(",");
+                                String cantidadParametros = "";
+                                if(arreglo.length>1)    // hay varios
+                                {   
+                                    cantidadParametros = String.valueOf(arreglo.length);
+                                }
+                                else if (arreglo[0].equals(""))     // No hay nada
+                                {    
+                                    cantidadParametros = "0";
+                                }
+                                else    // hay 1
+                                {   
+                                    cantidadParametros = "1";
+                                }
+                                RESULT = cantidadParametros + "_" + numLineas;
+                            :}
+                            ;
+
+FUNCIONES::=                  tkLlaveA:x1 F_SENTS tkLlaveC:x2
+                            {:
+                                int lineaInicio = x1left+1;
+                                //System.out.println("x1left = " + x1left);
+                                int lineaFin = x2left+1;
+                                //System.out.println("x2left = " + x2left);
+                                int totalLineas = lineaFin - lineaInicio ;
+                                String totalLineasString = String.valueOf(totalLineas-1);
+                                //System.out.println("total Lineas = " + totalLineasString);
+                                RESULT = totalLineasString;
+                            :}
+                            | EPS {: RESULT = ""; :}
+                            ;
+
+F_CUERPO::=                   TIPO:tipo tkId:x1 F_DECLARACIONES:x2
+                            {:
+                                String listaIds [] = x2.split(",");     // ,id1 - ,id1,id2 - ""
+                                if(listaIds.length > 1)
+                                {
+                                    if(!tipo.equals(""))
+                                    {
+                                        for(int i = 1; i<listaIds.length; i++)
+                                        {
+                                            NodoComparacion nodo = new NodoComparacion();
+                                            nodo.setNombreVariable(listaIds[i]);
+                                            agregarNodoComparacion(nodo);
+                                        }
+                                    }
+                                    
+                                    
+                                }
+                                if(!tipo.equals(""))
+                                {
+                                    NodoComparacion nodo = new NodoComparacion();
+                                    nodo.setNombreVariable(x1);
+                                    agregarNodoComparacion(nodo);
+                                }
+                                
+                            :}
+                            | CONSOLE 
+                            ;
+
+F_DECLARACIONES::=            L_ID:x1 F_IGUAL PUNTO_COMA {: RESULT = x1; :};
+
+F_IGUAL::=                    ASIG
+                            | tkMas tkMas 
+                            | tkMenos tkMenos 
+                            | F_INVOCAR
+                            ; 
+
+F_INVOCAR::=                  tkParentesisA PARAMETRO_SIN tkParentesisC;
+
+F_SENTS::=                    F_SENTS_;
+
+F_SENTS_::=                   F_SENT F_SENTS_
+                            | EPS ;
+
+F_SENT::=                     F_CUERPO
+                            | IF
+                            | DO_WHILE PUNTO_COMA
+                            | WHILE
+                            | FOR
+                            | SWITCH
+                            | tkBreak PUNTO_COMA
+                            | tkReturn EXP PUNTO_COMA
+                            ;
+
+IF::=                         tkIf tkParentesisA COND tkParentesisC tkLlaveA F_SENTS tkLlaveC F_IF_
+                            ;
+
+F_IF_::=                      tkElse ELSE
+                            | EPS
+                            ;
+
+ELSE::=                       tkLlaveA F_SENTS tkLlaveC F_IF_
+                            | IF
+                            ;
+
+DO_WHILE::=                   tkDo tkLlaveA F_SENTS tkLlaveC tkWhile tkParentesisA COND tkParentesisC;
+
+WHILE::=                      tkWhile tkParentesisA COND tkParentesisC tkLlaveA F_SENTS tkLlaveC;
+
+FOR::=                        tkFor tkParentesisA COND_FOR tkParentesisC tkLlaveA F_SENTS tkLlaveC;
+
+SWITCH::=                     tkSwitch tkParentesisA EXP tkParentesisC tkLlaveA SW_SENTS tkLlaveC;
+
+SW_SENTS::=                   CASE DEFAULT;
+
+CASE::=                       tkCase EXP tkDosPuntos F_SENTS CASE_;
+
+CASE_::=                      tkCase EXP tkDosPuntos F_SENTS CASE_
+                            | EPS ;
+
+DEFAULT::=                    tkDefault tkDosPuntos F_SENTS;
+
+COND_FOR::=                   TIPO:tipo tkId:x1 ASIG tkPuntoComa COND tkPuntoComa tkId INCRE_DECRE
+                            {:
+                                if(!tipo.equals(""))
+                                {
+                                    NodoComparacion nodo = new NodoComparacion();
+                                    nodo.setNombreVariable(x1);
+                                    agregarNodoComparacion(nodo);
+                                }
+                                
+                            :}
+                            ;
+
+INCRE_DECRE::=                tkMas IG_EXP
+                            | tkMenos IG_EXP
+                            | tkPor IG_EXP
+                            | tkIgual EXP
+                            ;
+
+IG_EXP::=                     tkIgual EXP
+                            | tkMas
+                            | tkMenos
+                            ;
+
+L_ID::=                       L_ID_:x1 {: RESULT = x1; :};
+
+L_ID_::=                      tkComa:x1 tkId:x2 L_ID_:x3 {: RESULT = x1 + x2 + x3; :}
+                            | tkPunto tkId L_ID_
+                            | EPS {: RESULT = ""; :} ;
+
+ASIG::=                       tkIgual COND
+                            | EPS ;
+
+COND::=                       COND tkOr COND_A
+                            | COND_A
+                            ;
+
+COND_A::=                     COND_A tkAnd COND_B
+                            | COND_B
+                            ;
+
+COND_B::=                     tkNot COND_C
+                            | COND_C
+                            ;
+
+COND_C::=                     EXP
+                            | EXP RELACIONAL EXP
+                            ;
+
+RELACIONAL::=                 tkMayor RELACIONAL_
+                            | tkMenor RELACIONAL_
+                            | tkIgual tkIgual
+                            | tkNot tkIgual
+                            ;
+
+RELACIONAL_::=                tkIgual
+                            | EPS
+                            ;
+
+EXP::=                        EXP tkMas A
+                            | A
+                            ;
+
+A::=                          A tkMenos B
+                            | B
+                            ;
+
+B::=                          B tkDivision C
+                            | C
+                            ;
+
+C::=                          C tkPor D
+                            | D
+                            ;
+
+D::=                          D tkPorcentaje E
+                            | E
+                            ;
+
+E::=                          E tkPotencia F
+                            | F
+                            ;
+
+F::=                          tkMenos G
+                            | G
+                            ;
+
+G::=                          tkNumero
+                            | tkCadena
+                            | tkCaracter
+                            | tkTrue
+                            | tkFalse
+                            | tkNull
+                            | tkRequire tkParentesisA tkCadena tkParentesisC
+                            | tkParentesisA COND tkParentesisC
+                            | tkCorcheteA PARAMETRO_SIN tkCorcheteC
+                            | LLAMADA
+                            ;
+
+
+LLAMADA::=                    tkId LLAMADA_
+                            ;
+
+LLAMADA_::=                   tkPunto tkId LLAMADA_
+                            | tkParentesisA PARAMETRO_SIN tkParentesisC
+                            | EPS
+                            ;
+
+PARAMETRO_SIN::=              EXP:x1 PARAMETRO_SIN2_:x2
+                            {:
+                                RESULT = x1 + x2;
+                            :}
+                            | EPS {: RESULT = ""; :}
+                            ;
+
+PARAMETRO_SIN2_::=            tkComa:x1 EXP:x2 PARAMETRO_SIN2_:x3
+                            {:
+                                RESULT = x1 + x2 + x3;
+                            :}
+                            | EPS {: RESULT = ""; :}
+                            ;
+
